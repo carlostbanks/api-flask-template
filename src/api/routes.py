@@ -22,13 +22,55 @@ def handle_hello():
 
 # Create a route to authenticate your users and return JWTs. The
 # create_access_token() function is used to actually generate the JWT.
-@api.route("/login", methods=["POST"])
-def login():
-    username = request.json.get("email", None)
-    password = request.json.get("password", None)
-    if email != "test" or password != "test":
-        return jsonify({"msg": "Bad username or password"}), 401
 
-    access_token = create_access_token(identity=email)
-    return jsonify(access_token=access_token)
+
+@api.route('/login', methods=['POST'])
+@cross_origin()
+def login():
+    email = request.json.get('email')
+    password = request.json.get('password')
+
+    if not email or not password:
+        return jsonify({'message': 'Invalid data'}), 400
+
+    user = User.query.filter_by(email=email,password=password).first()
+
+    if not user:
+        return jsonify({'message': 'User not found'}), 404
+
+   
+    token= create_access_token(identity=user.id)
+    return jsonify({
+        "message": "successfully logged in",
+        "token": token
+    }),200
+
+
+
+@api.route('/signup', methods=['POST'])
+@cross_origin()
+def signup():
+
+    email = request.json.get('email', None)
+    name = request.json.get('name', None)
+    password = request.json.get('password', None)
+    
+    if not email:
+        return "email is required", 401
+    if not name:
+        return "name is required", 401 
+    if not password:
+        return "password is required", 401   
+
+    email_check= User.query.filter_by(email=email).first() 
+    if email_check: 
+        return "this email already exist",401
+
+
+    user = User(email=email, name=name, password=password)
+    db.session.add(user)
+    db.session.commit()
+
+    return jsonify({'message': 'User created successfully', "email": email}) 
+
 
