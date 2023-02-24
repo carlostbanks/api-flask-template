@@ -71,6 +71,8 @@ def signup():
     db.session.add(user)
     db.session.commit()
 
-    return jsonify({'message': 'User created successfully', "email": email}) 
+    return jsonify({'message': 'User created successfully', "email": email})
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response 
 
 
